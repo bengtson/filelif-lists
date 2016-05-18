@@ -1,0 +1,7 @@
+    <!-- Event -->
+      <div style="margin: 0 auto; width: 600px; height: 30px;" title="Event Name: Midland Mortgage Payment, Rule: { Day 27 }, Tag: Bills">
+      	<span style="font-size:20px; font-family: 'Open Sans', sans-serif;">
+      	  	&nbsp;&nbsp;<input type="checkbox" name="t" onclick="window.location='/checked?event=Midland+Mortgage+Payment&overdue=true&value='+this.value;">
+      	  	&nbsp;<%= first["Name"] %> (1 Time)
+      	</span>
+      </div>

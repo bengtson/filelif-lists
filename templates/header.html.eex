@@ -1,0 +1,47 @@
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+  <title>Lists Compendium - FileliF</title>
+</head>
+<body>
+  <div style="position: relative; margin: 0 auto; width: 600px;">
+
+    <div style="position: absolute; bottom: -60; float: left;">
+      <span style="font-size: 45px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
+        Lists Compendium
+      </span>
+    </div>
+
+    <div style="float: right;"">
+      <img style="opacity: 1.0;" src="/logo.png" />
+    </div>
+
+  </div>
+
+  <div style="margin: 0 auto; width: 600px;">
+    <div style="clear: right; height: 10px;"> </div>
+    <div style="clear: right; height: 2px; background-color: #a00000;"> </div>
+    <div style="clear: right; height: 5px;"> </div>
+
+    <div style="clear: right; float: right;">
+        <button type="button">Events</button>
+        <button type="button">Add</button>
+    </div>
+
+
+    <div style="clear: right; height: 5px;"> </div>
+    <div style="clear: right; height: 1px; background-color: #c0c0c0;"> </div>
+    <div style="clear: right; height: 10px;"> </div>
+  </div>
+
+  <div style="position: relative; margin: 0 auto; width: 600px;">
+    <span style="font-size: 15px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
+      Monday : 17-May-2016
+    </span>
+  </div>
+  <div style="clear: right; height: 8px;"> </div>
+
+    <%= Lists.ListEntry.listentry %>
+
+</body>
+</html>
