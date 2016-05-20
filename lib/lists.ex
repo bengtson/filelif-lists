@@ -14,7 +14,6 @@ defmodule Lists do
   end
 
   def run do
-    IO.puts "Starting Cowboy"
     { :ok, _ } = Plug.Adapters.Cowboy.http Lists.Router, [], port: 7575
   end
 end
