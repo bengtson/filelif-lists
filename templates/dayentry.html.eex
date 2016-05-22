@@ -1,0 +1,11 @@
+
+  <div style="clear: right; height: 20px;"> </div>
+
+  <div style="position: relative; margin: 0 auto; width: 600px;">
+    <span style="font-size: 15px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
+      <%= Lists.DayEntry.formatted_date date %>
+    </span>
+  </div>
+  <div style="clear: right; height: 8px;"> </div>
+
+    <%= Lists.ListEntry.list_entry date %>

@@ -1,9 +1,9 @@
 defmodule Lists.ListEntry do
   require EEx
 
-  EEx.function_from_file(:def, :base, Path.expand("./templates/listentry.html.eex"), [:first])
+  EEx.function_from_file(:def, :base, Path.expand("./templates/listentry.html.eex"), [:event])
 
-  def listentry do
+  def list_entry(date) do
 
 #    events = [
 #      %{"Checked" => "03-Apr-2016", "Name" => "Midland Mortgage Payment"},
@@ -11,7 +11,7 @@ defmodule Lists.ListEntry do
 #    ]
 
 #   {:ok, events } = DataServer.get_list_type "Event"
-    {:ok, events } = DataServer.evaluate_events
+    {:ok, events } = DataServer.evaluate_events date
 #  IO.inspect events
 
     events |>

@@ -2,6 +2,18 @@
 <head>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
   <title>Lists Compendium - FileliF</title>
+  <style type="text/css">
+     .list-entry-checkmark {
+       opacity: 0.0;
+     }
+     .list-entry:hover {
+      cursor:pointer;
+      background-color: #ccffcc;
+     }
+     .list-entry:hover .list-entry-checkmark {
+       opacity: 1.0;
+     }
+</style>
 </head>
 <body>
   <div style="position: relative; margin: 0 auto; width: 600px;">
@@ -34,14 +46,7 @@
     <div style="clear: right; height: 10px;"> </div>
   </div>
 
-  <div style="position: relative; margin: 0 auto; width: 600px;">
-    <span style="font-size: 15px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
-      Monday : 17-May-2016
-    </span>
-  </div>
-  <div style="clear: right; height: 8px;"> </div>
-
-    <%= Lists.ListEntry.listentry %>
+  <%= Lists.DayEntry.listdays %>
 
 </body>
 </html>
