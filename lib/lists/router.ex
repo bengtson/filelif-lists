@@ -20,6 +20,7 @@ defmodule Lists.Router do
   get "/checked" do
     conn = fetch_query_params(conn,"") # populates conn.params
     %{ "event" => event} = conn.params
+    DataServer.check(event)
 
     conn
       |> put_resp_header("location", "/")

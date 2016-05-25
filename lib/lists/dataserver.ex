@@ -30,6 +30,13 @@ defmodule DataServer do
   end
 
   @doc """
+  Sets the state of the specified event to 'checked'
+  """
+  def check(record_id) do
+    GenServer.call(UpNextServer, {:check, record_id})
+  end
+
+  @doc """
   Evaluates all event dates based on the date provdied.
   """
   def evaluate_events(eval_date \\ Timex.Date.now(Timex.Timezone.local())) do
@@ -51,6 +58,26 @@ defmodule DataServer do
     typelist = lists
       |> Enum.filter(&(is_type(&1,type)))   # Remove unwanted type.
     {:reply, {:ok, typelist}, lists}
+  end
+
+  # Pattern match to get the record of interest.
+  def handle_call({:check, record_id}, _from, lists) do
+    IO.puts "Checking Record ID"
+    updated_lists = lists
+      |> Enum.map(&(check_record(&1,record_id)))
+    {:reply, :ok, updated_lists}
+  end
+
+  def check_record(record, id) do
+    { num_id, _ } = Integer.parse(id)
+    %{ "!Record ID" => record_id } = record
+    case record_id == num_id do
+      true ->
+        date = Timex.Date.now(Timex.Timezone.local())
+        Map.merge(record, %{ "Checked" => "Yes" })
+      false ->
+        record
+    end
   end
 
   # Probably have a case statement that looks at record type. If not an event,
