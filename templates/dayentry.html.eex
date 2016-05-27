@@ -5,6 +5,7 @@
     <span style="font-size: 15px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
       <%= Lists.DayEntry.formatted_date date %>
     </span>
+      <%= Lists.DayEntry.letters %>
   </div>
   <div style="clear: right; height: 8px;"> </div>
 

@@ -15,6 +15,10 @@ defmodule DataServer do
 
   # Client code follows.
 
+  def update_ping do
+    IO.puts "Update Ping Received"
+  end
+
   @doc """
   Returns the full set of lists.
   """
@@ -50,31 +54,49 @@ defmodule DataServer do
       GenServer.call(UpNextServer, :write_lists)
   end
 
-  def handle_call(:get_lists, _from, lists) do
-    {:reply, lists, lists}
+  @doc """
+  Returns the instance of the lists database. The instance is generated each time the DataServer starts up. This provides a method for rejecting stale requests from a browser window.
+  """
+  def get_lists_instance do
+    GenServer.call(UpNextServer, :instance)
   end
 
-  def handle_call({:type, type}, _from, lists) do
+  def handle_call(:instance, _from, state) do
+    { :reply, state["Instance"], state }
+  end
+
+  def handle_call(:get_lists, _from, state) do
+    %{ "Lists" => lists } = state
+    {:reply, lists, state}
+  end
+
+  def handle_call({:type, type}, _from, state) do
+    %{ "Lists" => lists } = state
     typelist = lists
       |> Enum.filter(&(is_type(&1,type)))   # Remove unwanted type.
-    {:reply, {:ok, typelist}, lists}
+    {:reply, {:ok, typelist}, state}
   end
 
   # Pattern match to get the record of interest.
-  def handle_call({:check, record_id}, _from, lists) do
-    IO.puts "Checking Record ID"
+  def handle_call({:check, record_id}, _from, state) do
+    %{ "Lists" => lists } = state
     updated_lists = lists
       |> Enum.map(&(check_record(&1,record_id)))
-    {:reply, :ok, updated_lists}
+    new_state = Map.merge(state,%{ "Lists" => updated_lists})
+    {:reply, :ok, new_state}
   end
 
   def check_record(record, id) do
     { num_id, _ } = Integer.parse(id)
-    %{ "!Record ID" => record_id } = record
+    %{ "Meta Data" => meta_data } = record
+    %{ "Record ID" => record_id} = meta_data
     case record_id == num_id do
       true ->
         date = Timex.Date.now(Timex.Timezone.local())
-        Map.merge(record, %{ "Checked" => "Yes" })
+        {:ok, formatted_date} = Timex.format(date, "{0D}-{Mshort}-{YYYY}")
+
+        IO.puts "Checked Item : " <> record["Name"]
+        Map.merge(record, %{ "Checked" => formatted_date })
       false ->
         record
     end
@@ -82,23 +104,26 @@ defmodule DataServer do
 
   # Probably have a case statement that looks at record type. If not an event,
   # then return it. If it's an event, call the evaluate_event funciton.
-  def handle_call({:evaluate, eval_date}, _from, lists) do
+  def handle_call({:evaluate, eval_date}, _from, state) do
+    %{ "Lists" => lists } = state
     events = lists
       |> Enum.filter(&(is_type(&1,"Event")))
       |> Enum.filter(&(event_matches?(&1,eval_date)))
-    {:reply, {:ok, events}, lists}
+    {:reply, {:ok, events}, state}
   end
 
-  def handle_call(:write_lists, _from, lists) do
+  def handle_call(:write_lists, _from, state) do
+    %{ "Lists" => lists } = state
     write_lists_to_file (lists)
-    {:reply, :ok, lists}
+    {:reply, :ok, state}
   end
 
   @doc """
   Checks the provided event record to see if it is active for the evalute date provided.
   """
   def event_matches?(record,eval_date) do
-    %{ "!Parsed Rule" => rule_list} = record
+    %{ "Meta Data" => meta_data } = record
+    %{ "Parsed Rule" => rule_list} = meta_data
     rules_parse(false, record, rule_list, eval_date)
   end
 
@@ -106,7 +131,20 @@ defmodule DataServer do
   # shown in the following:
   #   [ "June", "Day", "1"]
   # The rule is processed and true/false returned based on match to eval_date.
-  defp rules_parse(true, _, _, _), do: true
+  defp rules_parse(true, record, eval_date, build_date) do
+    checked_date_string = record["Checked"]
+    IO.inspect checked_date_string
+    cond do
+      checked_date_string == nil ->
+        true
+      true ->
+        { :ok, checked_date } = Timex.parse(checked_date_string, "{D}-{Mshort}-{YYYY}")
+        IO.puts "Checking Date"
+        IO.inspect checked_date
+        IO.inspect build_date
+        checked_date != build_date
+    end
+  end
   defp rules_parse(state, _, [], _), do: false
   defp rules_parse(state, record, parse_list, eval_date) do
     [ rule | tail_rules ] = parse_list
@@ -228,16 +266,34 @@ defmodule DataServer do
   end
 
   def is_type(record, type) do
-    case record do
-      %{ "!Type" => ^type } ->
+    %{ "Meta Data" => meta_data } = record
+    case meta_data do
+      %{ "Type" => ^type } ->
         true
       _ ->
         false
     end
   end
 
+  @doc """
+  State for the DataServer consists of the following:
+
+    %{ "Lists" => lists, "Instance" => instance,
+       "Today" => today, "Next Record" => next_record_num }
+
+    lists : This is the list of all the list records. Each record is a map.
+    instanceid : Number generated when the server is started.
+    today : Current date that is being used for evaluations.
+  """
   def init (:ok) do
-    {:ok, load_lists}
+    Agent.start_link(fn -> 0 end, name: RecordCounter)
+    lists = load_lists
+    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
+    today = Timex.Date.now(Timex.Timezone.local())
+    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
+    state = %{ "Lists" => lists, "Instance" => instance,
+               "Today" => today, "Next Record" => next_record }
+    {:ok, state}
   end
 
   # Writes the list data to the specified file.
@@ -250,8 +306,8 @@ defmodule DataServer do
 
   defp write_record file, record do
     for { a, b } <- record do
-      is_prefixed = String.starts_with?(a,"!")
-      case is_prefixed do
+#      is_meta_data = (a == "Meta Data")
+      case (a == "Meta Data") do
         false ->
           IO.binwrite file, a <> " :: " <> b <> "\n"
         _ ->
@@ -269,7 +325,6 @@ defmodule DataServer do
 
   def load_data(data) do
 
-    Agent.start_link(fn -> 0 end, name: RecordCounter)
 
     list = data
       |> String.split("\n")               # Get list of lines.
@@ -282,14 +337,33 @@ defmodule DataServer do
       |> Enum.chunk_by(&(&1 == %{:delim => 0}))   # Group by record.
       |> Enum.filter(&(&1 != [%{:delim => 0}]))   # Remove delimiters.
       |> Enum.map(&(maps_to_map(&1)))             # Combine records maps.
-      |> Enum.map(&(add_type(&1)))                # Add record type.
+      |> Enum.map(&(add_meta_data(&1)))
 
-    Agent.stop(RecordCounter,:normal)
+#    Agent.stop(RecordCounter,:normal)
 
     list
 
 #      Enum.reduce list, [], fn record, newlist ->
 
+  end
+
+  defp add_meta_data (record) do
+    count = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
+    meta_data = %{ "Record ID" => count }
+    m = case record do
+      %{ "Rule" => rule } ->
+        Map.merge(meta_data, %{ "Type" => "Event", "Parsed Rule" => parse_rule(rule)})
+      %{ "List Name" => _ } ->
+        Map.merge(meta_data, %{ "Type" => "List"})
+      %{ "Tag" => _ } ->
+        Map.merge(meta_data, %{ "Type" => "Tag"})
+      _ ->
+        Map.merge(meta_data, %{ "Type" => "Unknown"})
+    end
+    xrec = %{ "Meta Data" => m }
+    updated_record = Map.merge(record,xrec)
+#    IO.inspect updated_record
+    updated_record
   end
 
   defp maps_to_map (list) do
@@ -303,23 +377,6 @@ defmodule DataServer do
         %{a => b}
       _ ->
         %{:delim => 0}
-    end
-  end
-
-# Attaches a record type field to each record. Also parses the rule String
-# into a list of lists for easier handling.
-  defp add_type record do
-    count = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
-
-    case record do
-      %{ "Rule" => rule } ->
-        Map.merge(record, %{ "!Type" => "Event", "!Parsed Rule" => parse_rule(rule), "!Record ID" => count})
-      %{ "List Name" => _ } ->
-        Map.merge(record, %{ "!Type" => "List", "!Record ID" => count})
-      %{ "Tag" => _ } ->
-        Map.merge(record, %{ "!Type" => "Tag", "!Record ID" => count})
-      _ ->
-        Map.merge(record, %{ "!Type" => "Unknown", "!Record ID" => count})
     end
   end
 

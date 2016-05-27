@@ -22,6 +22,19 @@ Lists can be either event based or named ordered lists.
 - [ ] Drop next days on the web page. Add next and previous to get to other days.
 - [ ] Overdue strategy is to start with current day and make a list of all days back to checked. This will give an overdue count. This only works for checked items. If item is a specific date and only 1, then overdue is all dates between. This strategy takes a while to load but is then easily updated for new dates.
 
+-define(INTERVAL, 60000). % One minute
+
+init(Args) ->
+   ... % Start first timer
+   erlang:send_after(?INTERVAL, self(), trigger),
+   ...
+
+handle_info(trigger, State) ->
+   ... % Do the action
+   ... % Start new timer
+   erlang:send_after(?INTERVAL, self(), trigger),
+   ...
+
 ## Storing Event Date Information
 It's complicated tracking an event for a number of reasons. Events can be overdue and calculating how many times it's been due is not easy.
 

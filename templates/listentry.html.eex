@@ -1,7 +1,7 @@
     <!-- Event -->
-      <div class="list-entry" style="margin: 0 auto; width: 600px; word-wrap: break-word;" title="<%= event["Rule"] %>" onclick="window.location='/checked?event=<%= event["!Record ID"] %>'">
+      <div class="list-entry" style="margin: 0 auto; width: 600px; word-wrap: break-word;" title="<%= entry["Rule"] %>" onclick="window.location='/check?record=<%= entry["Record ID"] %>&date=<%= entry["Check Date"] %>&instance=<%= entry["Instance"] %>'">
       	<span style="font-size:20px; font-family: 'Open Sans', sans-serif; word-wrap: break-word;">
       	  	&nbsp;<img class="list-entry-checkmark" width="21" height="21" src="/checkmark.png"/>
-            &nbsp;<%= event["Name"] %>
+            &nbsp;<%= entry["Name"] %>
       	</span>
       </div>

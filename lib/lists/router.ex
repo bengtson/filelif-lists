@@ -17,10 +17,10 @@ defmodule Lists.Router do
     send_resp(conn, 200, Lists.GenWebPage.page)
   end
 
-  get "/checked" do
+  get "/check" do
     conn = fetch_query_params(conn,"") # populates conn.params
-    %{ "event" => event} = conn.params
-    DataServer.check(event)
+    %{ "record" => record_id, "date" => date, "instance" => instance} = conn.params
+    DataServer.check(record_id)
 
     conn
       |> put_resp_header("location", "/")
