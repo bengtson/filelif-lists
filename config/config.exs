@@ -32,4 +32,6 @@ use Mix.Config
 # Configure file locations
 config :lists,
   list_file: "/Users/bengm0ra/Projects/FileliF/Compendiums/Lists.txt",
-  test_file: "/Users/bengm0ra/Projects/Filelif/Compendiums/TestLists.txt"
+  test_file: "/Users/bengm0ra/Projects/Filelif/Compendiums/TestLists.txt",
+  session_key: "filelif_lists_cookie",
+  secret_key: "jfksliecmdkrhuio"

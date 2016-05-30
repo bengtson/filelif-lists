@@ -6,7 +6,8 @@ defmodule Lists do
 
     children = [
       worker(__MODULE__, [], function: :run),
-      supervisor(DataServer, [])
+      supervisor(DataServer, []),
+      supervisor(Lists.SessionManager, [])
     ]
 
     opts = [strategy: :one_for_one, name: Lists.Supervisor]

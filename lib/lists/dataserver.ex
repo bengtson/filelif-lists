@@ -133,16 +133,12 @@ defmodule DataServer do
   # The rule is processed and true/false returned based on match to eval_date.
   defp rules_parse(true, record, eval_date, build_date) do
     checked_date_string = record["Checked"]
-    IO.inspect checked_date_string
     cond do
       checked_date_string == nil ->
         true
       true ->
-        { :ok, checked_date } = Timex.parse(checked_date_string, "{D}-{Mshort}-{YYYY}")
-        IO.puts "Checking Date"
-        IO.inspect checked_date
-        IO.inspect build_date
-        checked_date != build_date
+        {:ok, checked_date} = Timex.parse(checked_date_string, "{D}-{Mshort}-{YYYY}")
+        ! Timex.equal?(checked_date, build_date)
     end
   end
   defp rules_parse(state, _, [], _), do: false
