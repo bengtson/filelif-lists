@@ -28,6 +28,7 @@ defmodule Lists.Router do
   def session_manager(conn, _) do
     conn
     |> fetch_session
+    |> fetch_query_params("")
       |> Lists.SessionManager.check_session
       |> Lists.SessionManager.touch_session
   end
@@ -40,22 +41,15 @@ defmodule Lists.Router do
 
   # Root path
   get "/" do
-
     conn
-      |> fetch_session
-#      |> put_session(:message, "Session YYY")
       |> Lists.GenWebPage.page
       |> send_resp
   end
 
   get "/check" do
-    conn = conn
-      |> fetch_session
-      |> fetch_query_params("") # populates conn.params
-      |> configure_session([:renew])
-
     %{ "record" => record_id, "date" => date, "instance" => instance} = conn.params
     DataServer.check(record_id)
+
 
     conn
       |> put_resp_header("location", "/")

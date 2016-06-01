@@ -11,9 +11,9 @@ Lists can be either event based or named ordered lists.
 - [ ] Fix FileliF logo and it's position.
 - [ ] Write event 'Overdue' evaluation code.
 - [ ] Display 'Overdue' events.
-- [ ] Add 'Checked' field into evaluation of events.
-- [ ] Add checkbox response to server.
-- [ ] Add date formatting instead of setting "Checked" to "Yes"
+- [ ] Check item needs to check the instance.
+- [ ] Any changes to the list items should write a new file to disk.
+- [ ] Checked items not showing up as checked in written table.
 - [ ] Add !Formatted Listed Date to the record so Checked can be set correctly.
 - [ ] Need a way to delete a list item. Use a keyboard modifier key that changes from "check" item to "delete" item. icon must change and color should as well.
 - [ ] Evaluate events should be done each time a new date is requested. Evaluation should be saved so that it is not done again. More state for dataserver. Actually, keep a list in each item for all the dates that have been evaluated and the results. Extra storage but no biggie.

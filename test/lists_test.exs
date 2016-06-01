@@ -2,26 +2,22 @@ defmodule ListsTest do
   use ExUnit.Case
   doctest Lists
 
-  test "the truth" do
-    assert 1 + 1 == 2
-  end
-
   test "Rule Date Evaluation" do
     lists =
 """
 Name :: Rule Date Test
 Rule :: { 04-Sep-1955 }, { 21-Apr-2007 }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
     { :ok, date } = Timex.parse("21-Apr-2007", "{D}-{Mshort}-{YYYY}")
-    assert DataServer.event_matches?(record, date)
+    assert Lists.Events.Rules.event_matches?(record, date)
 
     { :ok, date } = Timex.parse("04-Sep-1955", "{D}-{Mshort}-{YYYY}")
-    assert DataServer.event_matches?(record, date)
+    assert Lists.Events.Rules.event_matches?(record, date)
 
     { :ok, date } = Timex.parse("22-Apr-2007", "{D}-{Mshort}-{YYYY}")
-    refute = DataServer.event_matches?(record, date)
+    refute Lists.Events.Rules.event_matches?(record, date)
   end
 
   test "Rule Day Name Evaluation" do
@@ -30,13 +26,13 @@ Rule :: { 04-Sep-1955 }, { 21-Apr-2007 }
 Name :: Rule Day Name Test
 Rule :: { Friday }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
     { :ok, date } = Timex.parse("20-May-2016", "{D}-{Mshort}-{YYYY}")
-    assert = DataServer.event_matches?(record, date)
+    assert Lists.Events.Rules.event_matches?(record, date)
 
     { :ok, date } = Timex.parse("21-May-2016", "{D}-{Mshort}-{YYYY}")
-    assert = DataServer.event_matches?(record, date)
+    refute Lists.Events.Rules.event_matches?(record, date)
   end
 
   test "Rule Day Number Evaluation" do
@@ -45,14 +41,14 @@ Rule :: { Friday }
 Name :: Rule Day Number Test
 Rule :: { Day 20 }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
     { :ok, date } = Timex.parse("20-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert match
 
     { :ok, date } = Timex.parse("21-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert !match
   end
 
@@ -62,14 +58,14 @@ Rule :: { Day 20 }
 Name :: Rule Lastday Test
 Rule :: { Lastday }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
     { :ok, date } = Timex.parse("31-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert match
 
     { :ok, date } = Timex.parse("21-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert !match
   end
 
@@ -79,14 +75,14 @@ Rule :: { Lastday }
 Name :: Rule Weekday Test
 Rule :: { Weekday }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
     { :ok, date } = Timex.parse("20-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert match
 
     { :ok, date } = Timex.parse("21-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert !match
   end
 
@@ -96,15 +92,15 @@ Rule :: { Weekday }
 Name :: Rule Businessday Test
 Rule :: { Day 19 Businessday 2 }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
 
     { :ok, date } = Timex.parse("23-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert match
 
     { :ok, date } = Timex.parse("20-May-2016", "{D}-{Mshort}-{YYYY}")
-    match = DataServer.event_matches?(record, date)
+    match = Lists.Events.Rules.event_matches?(record, date)
     assert !match
   end
 
@@ -114,14 +110,47 @@ Rule :: { Day 19 Businessday 2 }
 Name :: Rule Third Thursday Test
 Rule :: { Day 1 Thursday Nextday Thursday Nextday Thursday }
 """
-    records = DataServer.load_data lists
+    records = Lists.Access.load_data lists
     [ record | _ ] = records
 
     { :ok, date } = Timex.parse("19-May-2016", "{D}-{Mshort}-{YYYY}")
-    assert = DataServer.event_matches?(record, date)
+    assert Lists.Events.Rules.event_matches?(record, date)
 
     { :ok, date } = Timex.parse("20-May-2016", "{D}-{Mshort}-{YYYY}")
-    refult = DataServer.event_matches?(record, date)
+    refute Lists.Events.Rules.event_matches?(record, date)
+  end
+
+  test "Check Overdue Eval Data Generation On Rule" do
+    lists =
+"""
+Name :: Overdue Eval Data Created Test
+Rule :: { May Day 31 }
+Checked :: 30-May-2016
+"""
+    records = Lists.Access.load_data lists
+    [ record | _ ] = records
+    { :ok, date } = Timex.parse("01-Jun-2016", "{D}-{Mshort}-{YYYY}")
+    date = Timex.date(date)
+    record = Lists.Events.Overdue.generate_overdue_data record, date
+    eval_data = record["Eval Data"]
+    assert (eval_data["Overdue Count"] == 1), "Overdue Count Not One"
+    assert (eval_data["Overdue Type"] == :rules), "Overdue Not Type :rules"
+  end
+
+  test "Check Overdue Eval Data Generation On Single Date" do
+    lists =
+"""
+Name :: Overdue Eval Data Single Date Test
+Rule :: { 26-Mar-2016 }
+"""
+    records = Lists.Access.load_data lists
+    [ record | _ ] = records
+    { :ok, date } = Timex.parse("01-Jun-2016", "{D}-{Mshort}-{YYYY}")
+    date = Timex.date(date)
+    record = Lists.Events.Overdue.generate_overdue_data record, date
+    eval_data = record["Eval Data"]
+    assert (eval_data["Overdue Count"] == 67), "Overdue Count Not 67"
+    assert (eval_data["Overdue Type"] == :single_date), "Overdue Not Type :single_date"
   end
 
 end

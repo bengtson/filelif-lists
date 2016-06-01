@@ -6,6 +6,9 @@
       <%= Lists.DayEntry.formatted_date date %>
     </span>
       <%= Lists.DayEntry.letters %>
+      <!-- Overdue Select -->
+      <span style="float: right; padding-right: 10px;">DUE</span>
+
   </div>
   <div style="clear: right; height: 8px;"> </div>
 
