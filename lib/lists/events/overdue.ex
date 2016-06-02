@@ -30,7 +30,10 @@ The "Eval Map" is a map of parameters that is stored in the record. This map is 
   Generates the "Eval Data" map associated with the record provided. A date needs to be supplied which is generally the day prior to the current day since nothing can really be overdue on the current day.
   """
   def generate_overdue_data(%{"Meta Data" => %{"Type" => "Event"}} = record, date) do
-    IO.inspect record["Name"]
+    date = Timex.date(date)
+    date = Timex.shift(date, days: -1)
+#    IO.inspect record["Name"]
+#    IO.inspect date
     eval_map = %{
       "Overdue First Date" => date,
       "Overdue Last Date" => date,
@@ -66,10 +69,13 @@ The "Eval Map" is a map of parameters that is stored in the record. This map is 
     [rule_date_string | _] = record["Meta Data"]["Parsed Rule"]
     [rule_date_string | _] = rule_date_string
     overdue_last_date = record["Eval Data"]["Overdue Last Date"]
+    checked = record["Meta Data"]["Checked"]
 
     { :ok, date } = Timex.parse(rule_date_string, "{D}-{Mshort}-{YYYY}")
     date = Timex.date date
     cond do
+      checked != nil ->
+        put_in(record, ["Eval Data","Overdue Count"], 0)
       Timex.after?(date, overdue_last_date) ->
         record
       true ->
@@ -88,10 +94,17 @@ The "Eval Map" is a map of parameters that is stored in the record. This map is 
   # the provided date and the last checked date. This is done date by date
   # moving backwards.
   def generate_overdue_data_handler(:rules, record) do
+#    name = record["Name"]
+#    if name == "Feed Gabby and Lilly Breakfast" do
+#      IO.inspect record
+#    end
     first_overdue_date = record["Eval Data"]["Overdue First Date"]
     checked_date = record["Meta Data"]["Checked"]
+    overdue_count = record["Eval Data"]["Overdue Count"]
     cond do
-      first_overdue_date == checked_date ->
+      Timex.before?(first_overdue_date, checked_date) ->
+        record
+      overdue_count >= 10 ->
         record
       Lists.Events.Rules.event_matches?(record, first_overdue_date) ->
         overdue_count = record["Eval Data"]["Overdue Count"]

@@ -36,8 +36,8 @@
     <div style="clear: right; height: 5px;"> </div>
 
     <div style="clear: right; float: right;">
-        <button type="button">Events</button>
-        <button type="button">Add</button>
+        <button type="button" onclick="window.location='/button/events'">Events</button>
+        <button type="button" onclick="window.location='/button/add'">Add</button>
     </div>
 
 
@@ -46,7 +46,7 @@
     <div style="clear: right; height: 10px;"> </div>
   </div>
 
-  <%= Lists.DayEntry.listdays %>
+  <%= Lists.DayEntry.listdays(date) %>
 
 </body>
 </html>

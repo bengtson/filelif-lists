@@ -8,19 +8,19 @@ Lists can be either event based or named ordered lists.
 
 ## Next Steps
 
+- [ ] Bold DUE when due page is shown.
+- [ ] Create Add Event Page
+- [ ] Running tests loads the lists file and it should not. Figure out how to distinguish between production and development testing.
+- [ ] Keep list in each record of the date/match values.
+- [ ] Write timer to reevaluate events at midnight.
 - [ ] Fix FileliF logo and it's position.
-- [ ] Write event 'Overdue' evaluation code.
-- [ ] Display 'Overdue' events.
-- [ ] Check item needs to check the instance.
-- [ ] Any changes to the list items should write a new file to disk.
-- [ ] Checked items not showing up as checked in written table.
-- [ ] Add !Formatted Listed Date to the record so Checked can be set correctly.
+- [ ] Remove events that are complete.
+- [ ] Create archive list files with date of archiving. When?
 - [ ] Need a way to delete a list item. Use a keyboard modifier key that changes from "check" item to "delete" item. icon must change and color should as well.
 - [ ] Evaluate events should be done each time a new date is requested. Evaluation should be saved so that it is not done again. More state for dataserver. Actually, keep a list in each item for all the dates that have been evaluated and the results. Extra storage but no biggie.
 - [ ] Add an 'Undo' button to reverse the last action.
 - [ ] Could each item be a process?
-- [ ] Drop next days on the web page. Add next and previous to get to other days.
-- [ ] Overdue strategy is to start with current day and make a list of all days back to checked. This will give an overdue count. This only works for checked items. If item is a specific date and only 1, then overdue is all dates between. This strategy takes a while to load but is then easily updated for new dates.
+- [ ] Consider changing the list of records into a map of records based on record id.
 
 -define(INTERVAL, 60000). % One minute
 
@@ -64,13 +64,3 @@ All data added to records read from the file will have a Meta Data record as fol
 
   %{ "Eval Data" => eval map,
      "Record ID" => record_id }
-
-### DataServer State
-The DataServer has the following state:
-
-  %{ "Lists" => listdata,
-     "Instance ID" => unique id for instance or server,
-     "Today" => date being used for today,
-     "Undo Info" => undo packet}
-
-Instance ID generated with :crypto.strong_rand_bytes(16) |> Base.url_encode64

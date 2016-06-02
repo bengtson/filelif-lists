@@ -149,7 +149,7 @@ Rule :: { 26-Mar-2016 }
     date = Timex.date(date)
     record = Lists.Events.Overdue.generate_overdue_data record, date
     eval_data = record["Eval Data"]
-    assert (eval_data["Overdue Count"] == 67), "Overdue Count Not 67"
+    assert (eval_data["Overdue Count"] == 66), "Overdue Count Not 66"
     assert (eval_data["Overdue Type"] == :single_date), "Overdue Not Type :single_date"
   end
 

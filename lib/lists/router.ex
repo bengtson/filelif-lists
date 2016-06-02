@@ -41,21 +41,58 @@ defmodule Lists.Router do
 
   # Root path
   get "/" do
+    {:ok, show_date} = Lists.SessionManager.get_session_parameter(conn,"Show Date")
+    if show_date == nil do
+      show_date = Timex.Date.now(Timex.Timezone.local())
+      Lists.SessionManager.set_session_parameter(conn, "Show Date", show_date)
+    end
     conn
-      |> Lists.GenWebPage.page
+      |> Lists.GenWebPage.page(show_date)
       |> send_resp
   end
 
-  get "/check" do
-    %{ "record" => record_id, "date" => date, "instance" => instance} = conn.params
-    DataServer.check(record_id)
-
-
+  get "/show" do
+    %{"showdate" => show_date} = conn.params
+    cond do
+      show_date == "overdue" ->
+#        IO.puts "Showing Overdue List"
+        Lists.SessionManager.set_session_parameter(conn, "Show Date", "overdue")
+#        Lists.SessionManager.set_session_parameter(conn, "Show Date", Timex.Date.now(Timex.Timezone.local()))
+      true ->
+        {:ok, show_date} = Timex.parse(show_date, "{0D}-{Mshort}-{YYYY}")
+        Lists.SessionManager.set_session_parameter(conn, "Show Date", show_date)
+    end
     conn
       |> put_resp_header("location", "/")
       |> put_resp_content_type("text/html")
       |> send_resp(302,"")
+  end
+
+  get "/check" do
+    %{ "record" => record_id, "date" => date, "instance" => instance} = conn.params
+    DataServer.check(record_id, date, instance)
+
+    conn = conn
+      |> put_resp_header("location", "/")
+      |> put_resp_content_type("text/html")
+      |> send_resp(302,"")
+
+    DataServer.write_lists
+
+    conn
 #      |> halt
+  end
+
+  get "/button/events" do
+    conn
+      |> put_resp_header("location", "/")
+      |> put_resp_content_type("text/html")
+      |> send_resp(302,"")
+  end
+
+  get "/button/add" do
+    conn
+      |> send_resp(200, "Add Button Pressed")
   end
 
     match _ do

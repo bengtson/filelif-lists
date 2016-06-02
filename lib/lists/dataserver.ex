@@ -3,6 +3,16 @@ defmodule DataServer do
   @moduledoc """
   Provides UpNext database functions.
 
+  ### DataServer State
+  The DataServer has the following state:
+
+    %{ "Lists" => listdata,
+       "Instance ID" => unique id for instance or server,
+       "Today" => date being used for today,
+       "Undo Info" => undo packet
+     }
+
+
   All upnext data access should be through this module.
   """
 
@@ -29,7 +39,7 @@ defmodule DataServer do
     instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
     today = Timex.Date.now(Timex.Timezone.local())
     next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
-    lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
+    lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
     state = %{ "Lists" => lists, "Instance" => instance,
                "Today" => today, "Next Record" => next_record }
 #    state = process_list_data(state)
@@ -45,6 +55,10 @@ defmodule DataServer do
       GenServer.call(UpNextServer, :get_lists)
   end
 
+  def load_lists_from_file (path) do
+      GenServer.call(UpNextServer, {:load_from_file, path})
+  end
+
   @doc """
   Returns the types of records from the lists.
   """
@@ -55,8 +69,8 @@ defmodule DataServer do
   @doc """
   Sets the state of the specified event to 'checked'
   """
-  def check(record_id) do
-    GenServer.call(UpNextServer, {:check, record_id})
+  def check(record_id, date, instance) do
+    GenServer.call(UpNextServer, {:check, record_id, date, instance})
   end
 
   @doc """
@@ -80,6 +94,16 @@ defmodule DataServer do
     GenServer.call(UpNextServer, :instance)
   end
 
+  def handle_call({:load_from_file, path}, _from, state) do
+    lists = Lists.Access.load_lists
+    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
+    today = Timex.Date.now(Timex.Timezone.local())
+    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
+    lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
+    state = %{ "Lists" => lists, "Instance" => instance,
+               "Today" => today, "Next Record" => next_record }
+  end
+
   def handle_call(:instance, _from, state) do
     { :reply, state["Instance"], state }
   end
@@ -97,12 +121,16 @@ defmodule DataServer do
   end
 
   # Pattern match to get the record of interest.
-  def handle_call({:check, record_id}, _from, state) do
-    %{ "Lists" => lists } = state
-    updated_lists = lists
-      |> Enum.map(&(check_record(&1,record_id)))
-    new_state = Map.merge(state,%{ "Lists" => updated_lists})
-    {:reply, :ok, new_state}
+  def handle_call({:check, record_id, date, instance}, _from, state) do
+    %{ "Lists" => lists, "Instance" => server_instance } = state
+    if server_instance != instance do
+      {:reply, :ok, state}
+    else
+      updated_lists = lists
+        |> Enum.map(&(check_record(&1,record_id, date)))
+      new_state = Map.merge(state,%{ "Lists" => updated_lists})
+      {:reply, :ok, new_state}
+    end
   end
 
   # Probably have a case statement that looks at record type. If not an event,
@@ -121,17 +149,22 @@ defmodule DataServer do
     {:reply, :ok, state}
   end
 
-  def check_record(record, id) do
+  def check_record(record, id, formatted_date) do
     { num_id, _ } = Integer.parse(id)
     %{ "Meta Data" => meta_data } = record
     %{ "Record ID" => record_id} = meta_data
     case record_id == num_id do
       true ->
-        date = Timex.Date.now(Timex.Timezone.local())
-        {:ok, formatted_date} = Timex.format(date, "{0D}-{Mshort}-{YYYY}")
+#        date = Timex.Date.now(Timex.Timezone.local())
+        {:ok, date} = Timex.parse(formatted_date, "{0D}-{Mshort}-{YYYY}")
+        date = Timex.date(date)
 
-        IO.puts "Checked Item : " <> record["Name"]
-        Map.merge(record, %{ "Checked" => formatted_date })
+#        IO.puts "Checked Item : " <> record["Name"]
+        record = put_in(record, ["Meta Data", "Checked"], date)
+        record = put_in(record, ["Checked"], formatted_date)
+        record = Lists.Events.Overdue.generate_overdue_data(record,date)
+#        IO.inspect record
+#        Map.merge(record, %{ "Checked" => formatted_date })
       false ->
         record
     end

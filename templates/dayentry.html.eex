@@ -5,11 +5,12 @@
     <span style="font-size: 15px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
       <%= Lists.DayEntry.formatted_date date %>
     </span>
-      <%= Lists.DayEntry.letters %>
+      <%= Lists.DayEntry.letters date %>
       <!-- Overdue Select -->
-      <span style="float: right; padding-right: 10px;">DUE</span>
+      <span style="font-size: 15px; float: right; padding-right: 10px;
+      cursor: pointer;" onclick="window.location='/show?showdate=overdue'">OVERDUE</span>
 
   </div>
   <div style="clear: right; height: 8px;"> </div>
 
-    <%= Lists.ListEntry.list_entry date %>
+    <%= Lists.ListEntry.list_entry date, overdue %>

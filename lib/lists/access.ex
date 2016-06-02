@@ -2,7 +2,7 @@ defmodule Lists.Access do
 
   # Writes the list data to the specified file.
   def write_lists_to_file (lists) do
-    {:ok, file} = File.open Application.fetch_env!(:lists, :test_file), [:write]
+    {:ok, file} = File.open Application.fetch_env!(:lists, :list_file), [:write]
     lists
       |> Enum.map(&(write_record file, &1))
     File.close (file)
@@ -26,10 +26,12 @@ defmodule Lists.Access do
 # record from the file.
   def load_lists do
     data = File.read!(Application.fetch_env!(:lists, :list_file))
+#    data = File.read!(path)
     load_data data
   end
 
   def load_data(data) do
+#    date = Timex.Date.now(Timex.Timezone.local())
     data
       |> String.split("\n")               # Get list of lines.
       |> Enum.drop_while(&(&1 == ""))             # Remove leading empty lines.
@@ -42,6 +44,7 @@ defmodule Lists.Access do
       |> Enum.filter(&(&1 != [%{:delim => 0}]))   # Remove delimiters.
       |> Enum.map(&(maps_to_map(&1)))             # Combine records maps.
       |> Enum.map(&(add_meta_data(&1)))
+#      |> Enum.map(&(Lists.Events.overdue(&1,date)))
   end
 
   defp add_meta_data (record) do

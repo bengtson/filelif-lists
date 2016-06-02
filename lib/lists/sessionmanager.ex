@@ -2,7 +2,13 @@ defmodule Lists.SessionManager do
   use GenServer
   import Plug.Conn
   @moduledoc """
-  Provides UpNext database functions.
+  ## Session Manager
+  The session manager keeps the following state:
+
+  %{"Sessions" =>
+      %{session_id => session_map,
+        session_id => session_map,
+        ...}}
 
   All upnext data access should be through this module.
   """
@@ -19,6 +25,14 @@ defmodule Lists.SessionManager do
   from the cookies, then a new session is started.
   If a session id is retrieved, it's looked up in the session table to see if it's valid. If not, a new session is started. If session is valid, nothing more to do here.
   """
+  def get_session_parameter conn, key do
+    GenServer.call(SessionServer, {:get_session_parameter, conn, key})
+  end
+
+  def set_session_parameter conn, key, value do
+    GenServer.call(SessionServer, {:set_session_parameter, conn, key, value})
+  end
+
   def check_session conn do
     GenServer.call(SessionServer, {:check_session, conn})
   end
@@ -38,6 +52,18 @@ defmodule Lists.SessionManager do
   def get_session_by_connection(conn) do
     session_id = get_session(conn, :session_id)
     GenServer.call(SessionServer, {:get_session_by_id, session_id})
+  end
+
+  def handle_call({:get_session_parameter, conn, parameter_name}, _from, state) do
+    session_id = get_session(conn, :session_id)
+    value = get_in(state, ["Sessions", session_id, parameter_name])
+    {:reply, {:ok, value}, state}
+  end
+
+  def handle_call({:set_session_parameter, conn, key, value}, _from, state) do
+    session_id = get_session(conn, :session_id)
+    new_state = put_in(state, ["Sessions", session_id, key], value)
+    {:reply, :ok, new_state}
   end
 
   def handle_call(:get_sessions, _from, state) do

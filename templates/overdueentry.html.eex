@@ -1,8 +1,8 @@
-<!-- Event -->
+<!-- Overdue Event -->
   <div class="list-entry" style="clear: both; margin: 0 auto; width: 600px; word-wrap: break-word;" title="<%= entry["Rule"] %>" onclick="window.location='/check?record=<%= entry["Record ID"] %>&date=<%= entry["Check Date"] %>&instance=<%= entry["Instance"] %>'">
         <div style="float: left; padding-right: 10px;"><img class="list-entry-checkmark" src="/checkmark.png"/></div>
-        <p style="overflow: hidden; margin: 0px;">
+        <div style="overflow: hidden; margin: 0px;">
       <span style="font-size: 15px; font-family: 'Open Sans', sans-serif; word-wrap: break-word;">
         <%= entry["Name"] %>
-    </span></p>
+    </span><span style="float: right;"><%= entry["Overdue String"]%></span></div>
   </div>
