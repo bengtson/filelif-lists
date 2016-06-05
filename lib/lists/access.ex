@@ -34,6 +34,7 @@ defmodule Lists.Access do
 #    date = Timex.Date.now(Timex.Timezone.local())
     data
       |> String.split("\n")               # Get list of lines.
+#      |> String.strip("\r")
       |> Enum.drop_while(&(&1 == ""))             # Remove leading empty lines.
       |> Enum.reverse
       |> Enum.drop_while(&(&1 == ""))             # Remove trailing empty lines.
@@ -81,7 +82,7 @@ defmodule Lists.Access do
   defp set_atom (pair) do
     case pair do
       [a, b] ->
-        %{a => b}
+        %{String.strip a => String.strip b}
       _ ->
         %{:delim => 0}
     end

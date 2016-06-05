@@ -8,7 +8,7 @@
       <%= Lists.DayEntry.letters date %>
       <!-- Overdue Select -->
       <span style="font-size: 15px; float: right; padding-right: 10px;
-      cursor: pointer;" onclick="window.location='/show?showdate=overdue'">OVERDUE</span>
+      cursor: pointer; font-weight: <%= if overdue do %>bold<% else %>normal<% end %>;" onclick="window.location='/show?showdate=overdue'">OVERDUE</span>
 
   </div>
   <div style="clear: right; height: 8px;"> </div>

@@ -5,6 +5,8 @@ defmodule Lists.Router do
     use Plug.Debugger
   end
 
+  plug Plug.Parsers, parsers: [:urlencoded]
+
   plug Plug.Session,
     store: :cookie,
 #    key: "filelif_lists_cookie",
@@ -92,7 +94,19 @@ defmodule Lists.Router do
 
   get "/button/add" do
     conn
-      |> send_resp(200, "Add Button Pressed")
+      |> Lists.AddEventPage.page
+      |> send_resp
+  end
+
+  post "/newevent" do
+#    %{ "event" => new_event} = conn.params
+    IO.inspect conn.params
+    event = conn.params["event"]
+    IO.inspect event
+    record = Lists.Access.load_data event
+    IO.inspect record
+    conn
+      |> send_resp(200, "New Event Received")
   end
 
     match _ do

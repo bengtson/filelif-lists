@@ -64,30 +64,39 @@ The "Eval Map" is a map of parameters that is stored in the record. This map is 
   # Following are the handlers that determine overdue counts. There is one
   # handler for each type of event record.
 
-  # Calculate the number of days overdue and put that into the overdue count.
+  # Given that record is a single date, the following processing occurs:
+  #
+  #   Get the rule date
+  #   Get the overdue last date (usually today)
+  #   Get the date checked (may not exist)
+  #
+  #   If already checked, then this can't be overdue.
+  #   If the date is in the future, return the record since it's not due yet.
+  #   Set the days overdue into record and return the record.
   def generate_overdue_data_handler(:single_date, record) do
-    [rule_date_string | _] = record["Meta Data"]["Parsed Rule"]
-    [rule_date_string | _] = rule_date_string
+
+    [[rule_date_string | _] | _ ] = record["Meta Data"]["Parsed Rule"]
+    { :ok, date } = Timex.parse(rule_date_string, "{D}-{Mshort}-{YYYY}")
+    date = Timex.date date
     overdue_last_date = record["Eval Data"]["Overdue Last Date"]
     checked = record["Meta Data"]["Checked"]
 
-    { :ok, date } = Timex.parse(rule_date_string, "{D}-{Mshort}-{YYYY}")
-    date = Timex.date date
     cond do
       checked != nil ->
         put_in(record, ["Eval Data","Overdue Count"], 0)
       Timex.after?(date, overdue_last_date) ->
         record
       true ->
-        days = Timex.diff(date, overdue_last_date, :days)
+        days = Timex.diff(date, overdue_last_date, :days) + 1
         put_in(record, ["Eval Data","Overdue Count"], days)
     end
   end
 
   # Since this record has not been checked, it can't be considered overdue.
-  # simply return the record.
+  # simply return the record. Note that single_date types are handled in the
+  # single_date handler even if not checked.
   def generate_overdue_data_handler(:not_checked, record) do
-    record
+    put_in(record,["Eval Data", "Overdue Count"], 1)
   end
 
   # Calculates the number of times this event has not been checked between

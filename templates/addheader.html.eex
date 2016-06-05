@@ -1,0 +1,95 @@
+<html>
+<head>
+  <link href='https://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css'>
+  <title>Lists Compendium - FileliF</title>
+  <style type="text/css">
+     .list-entry-checkmark {
+       opacity: 0.0;
+     }
+     .list-entry:hover {
+      cursor:pointer;
+      background-color: #ccffcc;
+     }
+     .list-entry:hover .list-entry-checkmark {
+       opacity: 1.0;
+     }
+</style>
+  <script>
+    // Post to the provided URL with the specified parameters.
+    function post(path, params, method) {
+        method = method || "post"; // Set method to post by default if not specified.
+
+        // The rest of this code assumes you are not using a library.
+        // It can be made less wordy if you use one.
+        var form = document.createElement("form");
+        form.setAttribute("method", method);
+        form.setAttribute("action", path);
+
+        for(var key in params) {
+            if(params.hasOwnProperty(key)) {
+                var hiddenField = document.createElement("input");
+                hiddenField.setAttribute("type", "hidden");
+                hiddenField.setAttribute("name", key);
+                hiddenField.setAttribute("value", params[key]);
+
+                form.appendChild(hiddenField);
+             }
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+    }
+  </script>
+</head>
+<body>
+  <div style="position: relative; margin: 0 auto; width: 600px;">
+
+    <div style="position: absolute; bottom: -60; float: left;">
+      <span style="font-size: 45px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
+        Lists Compendium
+      </span>
+    </div>
+
+    <div style="float: right;"">
+      <img style="opacity: 1.0;" src="/logo.png" />
+    </div>
+
+  </div>
+
+  <div style="margin: 0 auto; width: 600px;">
+    <div style="clear: right; height: 10px;"> </div>
+    <div style="clear: right; height: 2px; background-color: #a00000;"> </div>
+    <div style="clear: right; height: 5px;"> </div>
+
+    <div style="clear: right; float: right;">
+        <button type="button" onclick="window.location='/button/events'">Show Events</button>
+    </div>
+
+
+    <div style="clear: right; height: 5px;"> </div>
+    <div style="clear: right; height: 1px; background-color: #c0c0c0;"> </div>
+    <div style="clear: right; height: 10px;"> </div>
+  </div>
+
+  <div style="margin: 0 auto; width: 600px;">
+    <span style="font-size: 15px; font-family: 'Open Sans', sans-serif; word-wrap: break-word;">
+      <textarea id="newevent" rows="6" cols="80">Name :: Event Name Here&#10;Rule :: { June Day 1 }&#10;Tag :: Home</textarea><br>
+      <p><button type="button" onclick="post('/newevent/', {event: document.getElementById('newevent').value});">Evaluate</button></p>
+      <textarea rows="6" cols="80">Event is Well Formed&#10;Next event date is : June 1, 2016.</textarea><br>
+      <p><button type="button">Add Event</button></p>
+
+  </span>
+  </div>
+  <div style="margin: 0 auto; width: 600px;">
+    <span style="font-size: 15px; font-family: 'Open Sans', sans-serif; word-wrap: break-word;">
+      Example Rules:<br>
+      { 02-Jun-2016 }<br>
+      { June Day 1 }<br>
+      { June Day 1 }, { July Day 15 }<br>
+      { Everyday }<br>
+      { Weekday }<br>
+    </span>
+    </div>
+
+</body>
+</html>

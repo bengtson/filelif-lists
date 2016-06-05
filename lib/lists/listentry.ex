@@ -8,17 +8,12 @@ defmodule Lists.ListEntry do
   def list_entry(date,overdue) do
     cond do
       overdue ->
-#        IO.inspect date
-#        IO.inspect overdue
         {:ok, events } = DataServer.get_list_type("Event")
         date = Timex.shift(date, days: -1)
-#        IO.inspect date
         events
           |> Enum.filter(&(filter_overdue(&1)))
           |> Enum.map(&(create_entry_data(&1,date)))
           |> Enum.map(&(Lists.ListEntry.overdue(&1)))
-#        IO.inspect x
-#        x
       true ->
         {:ok, events } = DataServer.evaluate_events date
         events
@@ -40,7 +35,6 @@ defmodule Lists.ListEntry do
       true ->
         ""
     end
-    count = record["Eval Data"]["Overdue Count"]
     %{ "Name" => record["Name"],
        "Rule" => record["Rule"],
        "Record ID" => meta_data["Record ID"],

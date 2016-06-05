@@ -8,8 +8,7 @@ Lists can be either event based or named ordered lists.
 
 ## Next Steps
 
-- [ ] Bold DUE when due page is shown.
-- [ ] Create Add Event Page
+- [ ] Show New Event meta data when "Evaluate" pressed.
 - [ ] Running tests loads the lists file and it should not. Figure out how to distinguish between production and development testing.
 - [ ] Keep list in each record of the date/match values.
 - [ ] Write timer to reevaluate events at midnight.

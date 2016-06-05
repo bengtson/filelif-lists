@@ -36,14 +36,24 @@ defmodule DataServer do
   def init (:ok) do
     Agent.start_link(fn -> 0 end, name: RecordCounter)
     lists = Lists.Access.load_lists
+#    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
+#    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
+#    today = Timex.Date.now(Timex.Timezone.local())
+#    lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
+#    state = %{ "Lists" => lists, "Instance" => instance,
+#               "Today" => today, "Next Record" => next_record }
+#    state = process_list_data(state)
+    state = new_day lists
+    {:ok, state}
+  end
+
+  def new_day lists do
+    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
     instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
     today = Timex.Date.now(Timex.Timezone.local())
-    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
     lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
     state = %{ "Lists" => lists, "Instance" => instance,
                "Today" => today, "Next Record" => next_record }
-#    state = process_list_data(state)
-    {:ok, state}
   end
 
   # Client code follows.
