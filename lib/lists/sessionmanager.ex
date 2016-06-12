@@ -63,7 +63,7 @@ defmodule Lists.SessionManager do
   def handle_call({:set_session_parameter, conn, key, value}, _from, state) do
     session_id = get_session(conn, :session_id)
     new_state = put_in(state, ["Sessions", session_id, key], value)
-    {:reply, :ok, new_state}
+    {:reply, conn, new_state}
   end
 
   def handle_call(:get_sessions, _from, state) do

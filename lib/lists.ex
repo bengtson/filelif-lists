@@ -8,7 +8,7 @@ defmodule Lists do
       worker(__MODULE__, [], function: :run),
       supervisor(DataServer, []),
       supervisor(Lists.SessionManager, []),
-      supervisor(Lists.Midnight, [])
+      supervisor(Lists.DayChange, [])
     ]
 
     opts = [strategy: :one_for_one, name: Lists.Supervisor]

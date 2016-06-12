@@ -8,6 +8,15 @@ Lists can be either event based or named ordered lists.
 
 ## Next Steps
 
+- The users list instance should be held in their sessionmanager. Set the
+- instance each time there is a call from the browser.
+- If the instance is different in plug :session_manager, redirect to "/", halt.
+- When add event is clicked the following should occur:
+  - call to addeventpage.example_page conn : This will set the text for the example event. The example should be evaluated. Then the example event and the evaluation should be shown.
+  - pressing evaluate will evaluate the event and rewrite the page.
+  - pressing add will cause the event to be added to the list. This will be done by DataServer add_list_record.
+- Add Search Capability To Events
+- Add Lists Display Capability
 - [ ] Show New Event meta data when "Evaluate" pressed.
 - [ ] Running tests loads the lists file and it should not. Figure out how to distinguish between production and development testing.
 - [ ] Keep list in each record of the date/match values.

@@ -28,11 +28,14 @@ defmodule Lists.Router do
   plug :session_manager
 
   def session_manager(conn, _) do
+    instance = DataServer.get_lists_instance
+    IO.inspect instance
     conn
     |> fetch_session
     |> fetch_query_params("")
       |> Lists.SessionManager.check_session
       |> Lists.SessionManager.touch_session
+      |> Lists.SessionManager.set_session_parameter("Instance", instance)
   end
 
 #  IO.puts "Common Code Here"

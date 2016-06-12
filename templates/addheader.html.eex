@@ -73,7 +73,7 @@
 
   <div style="margin: 0 auto; width: 600px;">
     <span style="font-size: 15px; font-family: 'Open Sans', sans-serif; word-wrap: break-word;">
-      <textarea id="newevent" rows="6" cols="80">Name :: Event Name Here&#10;Rule :: { June Day 1 }&#10;Tag :: Home</textarea><br>
+      <textarea id="newevent" rows="6" cols="80"><%= map["Example"] %></textarea><br>
       <p><button type="button" onclick="post('/newevent/', {event: document.getElementById('newevent').value});">Evaluate</button></p>
       <textarea rows="6" cols="80">Event is Well Formed&#10;Next event date is : June 1, 2016.</textarea><br>
       <p><button type="button">Add Event</button></p>

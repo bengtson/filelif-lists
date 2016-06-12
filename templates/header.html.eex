@@ -16,37 +16,41 @@
 </style>
 </head>
 <body>
-  <div style="position: relative; margin: 0 auto; width: 600px;">
+  <div style="display: flex; justify-content: flex-end; justify-content: space-between; margin: 0 auto; width: 600px;">
 
-    <div style="position: absolute; bottom: -60; float: left;">
-      <span style="font-size: 45px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
+    <div style="">
+      <span style="font-size: 25px; font-style: normal; font-weight: 300; font-family: 'Open Sans', sans-serif;">
         Lists Compendium
       </span>
     </div>
 
-    <div style="float: right;"">
-      <img style="opacity: 1.0;" src="/logo.png" />
+    <div style="align-self: flex-end;">
+      <button type="button" onclick="window.location='/button/events'">Events</button>
+      <button type="button" onclick="window.location='/button/events'">Lists</button>
+        <button type="button" onclick="window.location='/button/add'">+</button>
+        <input type="text" name="fname" size="12">
     </div>
-
   </div>
 
-  <div style="margin: 0 auto; width: 600px;">
-    <div style="clear: right; height: 10px;"> </div>
-    <div style="clear: right; height: 2px; background-color: #a00000;"> </div>
+  <div style="clear: left; margin: 0 auto; width: 600px;">
     <div style="clear: right; height: 5px;"> </div>
-
-    <div style="clear: right; float: right;">
-        <button type="button" onclick="window.location='/button/events'">Show Events</button>
-        <button type="button" onclick="window.location='/button/add'">Add New Event</button>
-    </div>
-
-
+    <div style="clear: right; height: 1px; background-color: #a00000;"> </div>
     <div style="clear: right; height: 5px;"> </div>
-    <div style="clear: right; height: 1px; background-color: #c0c0c0;"> </div>
-    <div style="clear: right; height: 10px;"> </div>
   </div>
 
   <%= Lists.DayEntry.listdays(date) %>
+
+  <div style="position: relative; margin: 0 auto; width: 600px;">
+
+    <div style="clear: right; height: 10px;"> </div>
+    <div style="clear: right; height: 1px; background-color: #a00000;"> </div>
+    <div style="clear: right; height: 10px;"> </div>
+
+    <div style="float: right;">
+      <img style="opacity: 0.5;" src="/logo.png" />
+    </div>
+
+  </div>
 
 </body>
 </html>
