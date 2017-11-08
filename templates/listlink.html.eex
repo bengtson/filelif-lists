@@ -1,0 +1,5 @@
+<!-- Event Link -->
+  <span>
+    <a href="<%= entry["Link Address"] %>" target="_blank"><%= entry["Link Name"] %></a>
+
+  </span>

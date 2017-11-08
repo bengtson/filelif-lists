@@ -8,6 +8,8 @@ Lists can be either event based or named ordered lists.
 
 ## Next Steps
 
+- If entry has a note, add it to the hover information.
+- Add list items to the system.
 - The users list instance should be held in their sessionmanager. Set the
 - instance each time there is a call from the browser.
 - If the instance is different in plug :session_manager, redirect to "/", halt.
@@ -42,6 +44,9 @@ handle_info(trigger, State) ->
    ... % Start new timer
    erlang:send_after(?INTERVAL, self(), trigger),
    ...
+
+## Road Map
+Integrate the Bullet Journal approach into the system. Each day a printout of what needs to be done can be provided. End of day, add what's been put on paper back into the system.
 
 ## Storing Event Date Information
 It's complicated tracking an event for a number of reasons. Events can be overdue and calculating how many times it's been due is not easy.

@@ -98,7 +98,7 @@ defmodule Lists.Access do
     rule
       |> String.split(",")
       |> Enum.map(&(String.strip(&1)))
-      |> Enum.map(&(String.slice(&1,1..-2)))
+      |> Enum.map(&(String.slice(&1,1..-2)))  #Remove braces and spaces.
       |> Enum.map(&(String.strip(&1)))
       |> Enum.map(&(String.split(&1," ")))
   end

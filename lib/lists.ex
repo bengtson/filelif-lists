@@ -16,6 +16,6 @@ defmodule Lists do
   end
 
   def run do
-    { :ok, _ } = Plug.Adapters.Cowboy.http Lists.Router, [], port: 7575
+    { :ok, _ } = Plug.Adapters.Cowboy.http Lists.Router, [], port: 7576
   end
 end

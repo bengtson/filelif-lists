@@ -56,6 +56,11 @@ defmodule Lists.Router do
       |> send_resp
   end
 
+  get "/checklist" do
+    conn
+    |> send_resp(200,"hello from checklists")
+  end
+
   get "/show" do
     %{"showdate" => show_date} = conn.params
     cond do

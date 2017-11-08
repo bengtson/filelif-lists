@@ -34,4 +34,5 @@ config :lists,
   list_file: "/Users/bengm0ra/Projects/FileliF/Compendiums/Lists.txt",
   test_file: "/Users/bengm0ra/Projects/Filelif/Compendiums/TestLists.txt",
   session_key: "filelif_lists_cookie",
-  secret_key: "jfksliecmdkrhuio"
+  secret_key: "jfksliecmdkrhuio",
+  bible_metadata_file: "/Users/bengm0ra/Projects/FileliF/Compendiums/Bible/Metadata.txt"

@@ -5,6 +5,32 @@ defmodule Lists.ListEntry do
 
   EEx.function_from_file(:def, :overdue, Path.expand("./templates/overdueentry.html.eex"), [:entry])
 
+  EEx.function_from_file(:def, :link, Path.expand("./templates/listlink.html.eex"), [:entry])
+
+  def show_link(link) do
+    case link do
+      nil -> ""
+      _ ->
+        parse_link(link)
+        Lists.ListEntry.link parse_link(link)
+    end
+  end
+
+  def parse_link(link) do
+    parts = link
+      |> String.trim("{")
+      |> String.trim("}")
+      |> String.trim(" ")
+      |> String.split(",")
+      |> Enum.map(&(String.trim(&1," ")))
+      |> Enum.map(&(String.trim(&1,"\"")))
+    [ link_name | [ link_address | _ ]] = parts
+    %{
+      "Link Name" => link_name,
+      "Link Address" => link_address
+    }
+  end
+
   def list_entry(date,overdue) do
     cond do
       overdue ->
@@ -36,6 +62,7 @@ defmodule Lists.ListEntry do
         ""
     end
     %{ "Name" => record["Name"],
+       "Link" => record["Link"],
        "Rule" => record["Rule"],
        "Record ID" => meta_data["Record ID"],
        "Check Date" => check_date,

@@ -29,6 +29,18 @@ defmodule Lists.DayChange do
     {:ok, %{"List Date" => current_date} }
   end
 
+  def force_day_change do
+    GenServer.call(DayChange, :force_day_change)
+  end
+
+  def handle_call(:force_day_change, _from, state) do
+    current_date =  DateTime.now(Timezone.local())
+    IO.puts "Forced Date Changed"
+    state = %{"List Date" => current_date}
+    DataServer.load_lists_from_file
+    {:reply, :ok, state}
+  end
+
   @doc """
   If the current date is not equal to the date held in state, then a request to reload the lists is sent to the data server. Otherwise, setup a new trigger.
   """
@@ -38,6 +50,7 @@ defmodule Lists.DayChange do
     if Timex.compare(list_date, current_date, :days) != 0 do
       IO.puts "Date Changed - Put Code To Do Update Here"
       state = %{"List Date" => current_date}
+      DataServer.load_lists_from_file
     end
 #    IO.inspect current_date
     Process.send_after(DayChange, :work, get_delay_ms current_date)
