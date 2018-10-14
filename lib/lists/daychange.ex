@@ -1,6 +1,7 @@
 defmodule Lists.DayChange do
   use GenServer
   use Timex
+
   @moduledoc """
   This gen server watches for a date change. This allows all the events data
   to be updated. The server gets a message at 1 second after each new minute.
@@ -16,28 +17,28 @@ defmodule Lists.DayChange do
   Start the link. This generates a call to 'init'.
   """
   def start_link do
-    GenServer.start_link(__MODULE__, %{} , [name: DayChange])
+    GenServer.start_link(__MODULE__, %{}, name: DayChange)
   end
 
   @doc """
   Set up the state to the current date and set a trigger a new trigger.
   """
-  def init _ do
-    current_date = DateTime.now(Timezone.local())
-#    IO.inspect get_delay_ms current_date
-    Process.send_after(DayChange, :work, get_delay_ms current_date)
-    {:ok, %{"List Date" => current_date} }
+  def init(_) do
+    current_date = Timex.now(Timezone.local())
+    #    IO.inspect get_delay_ms current_date
+    Process.send_after(DayChange, :work, get_delay_ms(current_date))
+    {:ok, %{"List Date" => current_date}}
   end
 
   def force_day_change do
     GenServer.call(DayChange, :force_day_change)
   end
 
-  def handle_call(:force_day_change, _from, state) do
-    current_date =  DateTime.now(Timezone.local())
-    IO.puts "Forced Date Changed"
+  def handle_call(:force_day_change, _from, _state) do
+    current_date = Timex.now(Timezone.local())
+    IO.puts("Forced Date Changed")
     state = %{"List Date" => current_date}
-    DataServer.load_lists_from_file
+    DataServer.load_lists_from_file()
     {:reply, :ok, state}
   end
 
@@ -46,20 +47,23 @@ defmodule Lists.DayChange do
   """
   def handle_info(:work, state) do
     list_date = state["List Date"]
-    current_date =  DateTime.now(Timezone.local())
-    if Timex.compare(list_date, current_date, :days) != 0 do
-      IO.puts "Date Changed - Put Code To Do Update Here"
-      state = %{"List Date" => current_date}
-      DataServer.load_lists_from_file
-    end
-#    IO.inspect current_date
-    Process.send_after(DayChange, :work, get_delay_ms current_date)
+    current_date = Timex.now(Timezone.local())
+
+    state =
+      if Timex.compare(list_date, current_date, :days) != 0 do
+        IO.puts("Date Changed - Put Code To Do Update Here")
+        DataServer.load_lists_from_file()
+        %{"List Date" => current_date}
+      end
+
+    #    IO.inspect current_date
+    Process.send_after(DayChange, :work, get_delay_ms(current_date))
     {:noreply, state}
   end
 
   # Calculates then number of milliseconds to the first second after a new
   # minute.
-  defp get_delay_ms date do
-    ((60 - date.second) + 1) * 1000
+  defp get_delay_ms(date) do
+    (60 - date.second + 1) * 1000
   end
 end

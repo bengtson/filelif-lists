@@ -1,5 +1,6 @@
 defmodule DataServer do
   use GenServer
+
   @moduledoc """
   Provides UpNext database functions.
 
@@ -20,7 +21,7 @@ defmodule DataServer do
   Starts the GenServer.
   """
   def start_link do
-    {:ok, _} = GenServer.start_link(__MODULE__, :ok, [name: UpNextServer, timeout: 20000])
+    {:ok, _} = GenServer.start_link(__MODULE__, :ok, name: UpNextServer, timeout: 20000)
   end
 
   @doc """
@@ -33,24 +34,29 @@ defmodule DataServer do
     instanceid : Number generated when the server is started.
     today : Current date that is being used for evaluations.
   """
-  def init (:ok) do
-    Agent.start_link(fn -> 0 end, [name: RecordCounter])
-    state = reload_lists
+  def init(:ok) do
+    Agent.start_link(fn -> 0 end, name: RecordCounter)
+    state = reload_lists()
     {:ok, state}
   end
 
   def reload_lists do
-    lists = Lists.Access.load_lists
-    new_day lists
+    lists = Lists.Access.load_lists()
+    new_day(lists)
   end
 
-  def new_day lists do
-    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
-    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
-    today = Timex.Date.now(Timex.Timezone.local())
-    lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
-    state = %{ "Lists" => lists, "Instance" => instance,
-               "Today" => today, "Next Record" => next_record }
+  def new_day(lists) do
+    next_record = Agent.get_and_update(RecordCounter, fn n -> {n + 1, n + 1} end)
+    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64()
+    today = Timex.now(Timex.Timezone.local())
+    lists = lists |> Enum.map(&Lists.Events.Overdue.generate_overdue_data(&1, today))
+
+    %{
+      "Lists" => lists,
+      "Instance" => instance,
+      "Today" => today,
+      "Next Record" => next_record
+    }
   end
 
   # Client code follows.
@@ -59,15 +65,15 @@ defmodule DataServer do
   Returns the full set of lists.
   """
   def get_lists do
-      GenServer.call(UpNextServer, :get_lists)
+    GenServer.call(UpNextServer, :get_lists)
   end
 
-#  def load_lists_from_file (path) do
-#      GenServer.call(UpNextServer, {:load_from_file, path})
-#  end
+  #  def load_lists_from_file (path) do
+  #      GenServer.call(UpNextServer, {:load_from_file, path})
+  #  end
 
   def load_lists_from_file do
-      GenServer.call(UpNextServer, :load_from_file, 20000)
+    GenServer.call(UpNextServer, :load_from_file, 20000)
   end
 
   @doc """
@@ -87,7 +93,7 @@ defmodule DataServer do
   @doc """
   Evaluates all event dates based on the date provdied.
   """
-  def evaluate_events(eval_date \\ Timex.Date.now(Timex.Timezone.local())) do
+  def evaluate_events(eval_date \\ Timex.now(Timex.Timezone.local())) do
     GenServer.call(UpNextServer, {:evaluate, eval_date}, 20000)
   end
 
@@ -95,7 +101,7 @@ defmodule DataServer do
   Writes the full set of lists to the list file.
   """
   def write_lists do
-      GenServer.call(UpNextServer, :write_lists)
+    GenServer.call(UpNextServer, :write_lists)
   end
 
   @doc """
@@ -105,49 +111,56 @@ defmodule DataServer do
     GenServer.call(UpNextServer, :instance)
   end
 
-  def handle_call(:load_from_file, _from, state) do
-    state = reload_lists
-    { :reply, :ok, state }
+  def handle_call(:load_from_file, _from, _state) do
+    state = reload_lists()
+    {:reply, :ok, state}
   end
 
   @doc """
   Not sure this is used.
   """
-#  def handle_call({:load_from_file, path}, _from, state) do
-#    lists = Lists.Access.load_lists
-#    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
-#    today = Timex.Date.now(Timex.Timezone.local())
-#    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
-#    lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
-#    state = %{ "Lists" => lists, "Instance" => instance,
-#               "Today" => today, "Next Record" => next_record }
-#  end
+  #  def handle_call({:load_from_file, path}, _from, state) do
+  #    lists = Lists.Access.load_lists
+  #    instance = :crypto.strong_rand_bytes(16) |> Base.url_encode64
+  #    today = Timex.Date.now(Timex.Timezone.local())
+  #    next_record = Agent.get_and_update(RecordCounter, fn(n) -> {n + 1, n + 1} end)
+  #    lists = lists |> Enum.map(&(Lists.Events.Overdue.generate_overdue_data(&1,today)))
+  #    state = %{ "Lists" => lists, "Instance" => instance,
+  #               "Today" => today, "Next Record" => next_record }
+  #  end
 
   def handle_call(:instance, _from, state) do
-    { :reply, state["Instance"], state }
+    {:reply, state["Instance"], state}
   end
 
   def handle_call(:get_lists, _from, state) do
-    %{ "Lists" => lists } = state
+    %{"Lists" => lists} = state
     {:reply, lists, state}
   end
 
   def handle_call({:type, type}, _from, state) do
-    %{ "Lists" => lists } = state
-    typelist = lists
-      |> Enum.filter(&(is_type(&1,type)))   # Remove unwanted type.
+    %{"Lists" => lists} = state
+
+    typelist =
+      lists
+      # Remove unwanted type.
+      |> Enum.filter(&is_type(&1, type))
+
     {:reply, {:ok, typelist}, state}
   end
 
   # Pattern match to get the record of interest.
   def handle_call({:check, record_id, date, instance}, _from, state) do
-    %{ "Lists" => lists, "Instance" => server_instance } = state
+    %{"Lists" => lists, "Instance" => server_instance} = state
+
     if server_instance != instance do
       {:reply, :ok, state}
     else
-      updated_lists = lists
-        |> Enum.map(&(check_record(&1,record_id, date)))
-      new_state = Map.merge(state,%{ "Lists" => updated_lists})
+      updated_lists =
+        lists
+        |> Enum.map(&check_record(&1, record_id, date))
+
+      new_state = Map.merge(state, %{"Lists" => updated_lists})
       {:reply, :ok, new_state}
     end
   end
@@ -155,43 +168,49 @@ defmodule DataServer do
   # Probably have a case statement that looks at record type. If not an event,
   # then return it. If it's an event, call the evaluate_event funciton.
   def handle_call({:evaluate, eval_date}, _from, state) do
-    %{ "Lists" => lists } = state
-    events = lists
-      |> Enum.filter(&(is_type(&1,"Event")))
-      |> Enum.filter(&(Lists.Events.Rules.event_matches?(&1,eval_date)))
+    %{"Lists" => lists} = state
+
+    events =
+      lists
+      |> Enum.filter(&is_type(&1, "Event"))
+      |> Enum.filter(&Lists.Events.Rules.event_matches?(&1, eval_date))
+
     {:reply, {:ok, events}, state}
   end
 
   def handle_call(:write_lists, _from, state) do
-    %{ "Lists" => lists } = state
-    Lists.Access.write_lists_to_file (lists)
+    %{"Lists" => lists} = state
+    Lists.Access.write_lists_to_file(lists)
     {:reply, :ok, state}
   end
 
   def check_record(record, id, formatted_date) do
-    { num_id, _ } = Integer.parse(id)
-    %{ "Meta Data" => meta_data } = record
-    %{ "Record ID" => record_id} = meta_data
+    {num_id, _} = Integer.parse(id)
+    %{"Meta Data" => meta_data} = record
+    %{"Record ID" => record_id} = meta_data
+
     case record_id == num_id do
       true ->
         {:ok, date} = Timex.parse(formatted_date, "{0D}-{Mshort}-{YYYY}")
-        date = Timex.date(date)
+        #        date = Timex.date(date)
         record = put_in(record, ["Meta Data", "Checked"], date)
         record = put_in(record, ["Checked"], formatted_date)
-        record = Lists.Events.Overdue.generate_overdue_data(record,date)
+        _record = Lists.Events.Overdue.generate_overdue_data(record, date)
+
       false ->
         record
     end
   end
 
   def is_type(record, type) do
-    %{ "Meta Data" => meta_data } = record
+    %{"Meta Data" => meta_data} = record
+
     case meta_data do
-      %{ "Type" => ^type } ->
+      %{"Type" => ^type} ->
         true
+
       _ ->
         false
     end
   end
-
 end

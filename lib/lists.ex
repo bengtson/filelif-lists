@@ -1,7 +1,7 @@
 defmodule Lists do
   use Application
 
-  def start( _type, _args ) do
+  def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
     children = [
@@ -16,6 +16,6 @@ defmodule Lists do
   end
 
   def run do
-    { :ok, _ } = Plug.Adapters.Cowboy.http Lists.Router, [], port: 7576
+    {:ok, _} = Plug.Adapters.Cowboy2.http(Lists.Router, [], port: 7576)
   end
 end

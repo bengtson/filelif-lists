@@ -8,18 +8,13 @@ defmodule Lists.GenWebPage do
   - Checks session to see if it exists.
   -
   """
-  def page conn, date do
+  def page(conn, date) do
+    #    sessions = Lists.SessionManager.get_sessions
+    #    IO.inspect sessions
+    #    session = Lists.SessionManager.get_session_by_connection(conn)
+    #    IO.inspect session
 
-#    sessions = Lists.SessionManager.get_sessions
-#    IO.inspect sessions
-    session = Lists.SessionManager.get_session_by_connection conn
-#    IO.inspect session
-
-#    IO.inspect date
-
-    conn |>
-      Plug.Conn.resp(200,base(date))
-
+    conn
+    |> Plug.Conn.resp(200, base(date))
   end
-
 end
