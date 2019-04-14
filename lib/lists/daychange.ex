@@ -54,6 +54,8 @@ defmodule Lists.DayChange do
         IO.puts("Date Changed - Put Code To Do Update Here")
         DataServer.load_lists_from_file()
         %{"List Date" => current_date}
+      else
+        state
       end
 
     #    IO.inspect current_date

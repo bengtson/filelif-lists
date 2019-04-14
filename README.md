@@ -2,6 +2,24 @@
 
 Lists is the **FileliF** Lists application. It manages the Lists compendium and provides a web interface to access the lists.
 
+## Update Planning
+
+Lists needs to have some additional flexibility to better manage my days.
+Following are some of the items that need to be added.
+
+- While I like 'bullet' journaling in a notebook, it doesn't allow for all the events that I use in 'Lists'. It also does not layout my day like I've started to do for work with project tracking.
+- Items in lists need to be able to be entered in lists.
+- Lists need to be nested so that 'home:build:vanity' has a list specific to vanity. Or 'work:papyrus-imaging:camera-software' has the list to do for camera software.
+- List items are really just events too. Call them entries.
+- Entries can have history attached to them so that I can see what was changed in the past for an event.
+- Entries can have complex repeats, triggers in, triggers out, start/end times or dates, and completion %.
+- Should be able to build a day list from options that are scheduled.
+- Have Indicia display (in bedroom) giving what the day looks like.
+- There should be an API to Lists that would allow a list to be extracted and processed and maybe placed back into the system.
+- Should be GraphQL ability to search lists.
+
+
+
 ## List Types
 
 Lists can be either event based or named ordered lists.
